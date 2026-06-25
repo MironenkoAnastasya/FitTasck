@@ -13,7 +13,7 @@ type NavItem = {
 }
 
 const NAV_ITEMS: NavItem[] = [
-    { label: 'Тренування', icon: 'barbell-outline',     iconActive: 'barbell',     href: '/workouts'  },
+    { label: 'Тренування', icon: 'barbell-outline',     iconActive: 'barbell',     href: '/workout'  },
     { label: 'Прогрес',    icon: 'trending-up-outline', iconActive: 'trending-up', href: '/progress'  },
     { label: 'Профіль',    icon: 'person-outline',      iconActive: 'person',      href: '/profile'   },
     { label: 'Налаштування', icon: 'settings-outline',  iconActive: 'settings',    href: '/settings'  },
@@ -64,6 +64,11 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
                 </Pressable>
             })}
             </View>
+
+
+            
+
+
         </DrawerContentScrollView>
     );
 }

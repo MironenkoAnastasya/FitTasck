@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 import DrawerContent from '@/src/components/DrawerContent';
+import { runMigrations } from '@/src/db/migrations';
+import { seedDatabase } from '@/src/db/seed';
 
 const RootLayout = () => {
+
+    useEffect(() => {
+        const init = async () => {
+           try{
+            runMigrations()
+            await seedDatabase()
+           } 
+           catch(error) {
+            console.error("DB init error", error)
+           }
+        }
+        init();
+    }, [])
+
+
     return (
         <GestureHandlerRootView>
             <Drawer

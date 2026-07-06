@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "FitTasck",
-    "slug": "FitTasck",
+    "name": "FitTrack",
+    "slug": "FitTrack",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "fittasck",
+    "scheme": "fittrack",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

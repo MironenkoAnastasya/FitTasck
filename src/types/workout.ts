@@ -23,5 +23,5 @@ export type Workout = {
   scheduledAt: string;
   completedAt?: string;
   notes?: string;
-
+ 
 };

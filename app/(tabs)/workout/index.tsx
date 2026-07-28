@@ -3,7 +3,7 @@ import WorkoutCard from '@/src/components/WorkoutCard';
 import { COLORS } from '@/src/constants/theme';
 import { useWorkouts } from '@/src/hooks/useWorkouts';
 import { useUIStore } from '@/src/store/uiStore';
-import { useWorkoutStore } from '@/src/workoutStore';
+import { useWorkoutStore } from '@/src/store/workoutStore';
 import type { Workout } from '@/src/types/workout';
 import { useRouter } from 'expo-router';
 import React from 'react';

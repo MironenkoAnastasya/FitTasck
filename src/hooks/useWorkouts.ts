@@ -22,3 +22,22 @@ export const useWorkoutDetail = (id: string) => {
         enabled: !!id 
     })
 }
+
+
+// !!!!!!!
+
+export const useAddWorkout = () => { 
+    return useMutation({
+      mutationFn: ({
+        workout,
+        exercises,
+      }: {
+        workout: NewWorkout;
+        exercises: Omit<NewExercise, "workoutId">[];
+      }) => insertWorkoutWithExercises(workout, exercises),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["workouts"] });
+      },
+    });
+}
+

@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Href, usePathname, useRouter } from 'expo-router';
 
 type NavItem = {
-    label: string,
+    label: string;
     icon: keyof typeof Ionicons.glyphMap;
     iconActive: keyof typeof Ionicons.glyphMap;
     href: string
@@ -25,51 +25,54 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
     const pathname = usePathname();
 
     const navigate = (href: string) => {
-        router.push(href as Href);
-        props.navigation.closeDrawer();
+        router.push(href as Href)
+        props.navigation.closeDrawer()
     }
+
     return (
-        <DrawerContentScrollView  {...props} 
-        style={[styles.container, {paddingTop: 20}]}>
-            
-
-          {/* Профіль користувача */}
-      <View style={styles.profile}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>FT</Text>
+      <DrawerContentScrollView
+        {...props}
+        contentContainerStyle={[styles.container, { paddingTop: 20 }]}
+      >
+        {/* Профіль користувача */}
+        <View style={styles.profile}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>FT</Text>
+          </View>
+          <Text style={styles.name}>FitTrack User</Text>
+          <Text style={styles.email}>fittrack@example.com</Text>
         </View>
-        <Text style={styles.name}>FitTrack User</Text>
-        <Text style={styles.email}>fittrack@example.com</Text>
-      </View>
- 
-      {/* Розділювач */}
-      <View style={styles.divider} />
- 
 
+        {/* Розділювач */}
+        <View style={styles.divider} />
 
-
-            <View style={styles.nav}>
-            {NAV_ITEMS.map((item) => {
-                const isActive = (pathname === '/' && item.href === '/workout') || pathname === item.href;
-                return <Pressable 
-                key={item.href} 
-                onPress={() => navigate(item.href)} 
-                style={[styles.navItem, isActive && styles.navItemActive]}>
-                    <Ionicons 
-                    name={ isActive ? item.iconActive : item.icon} 
-                    size={20} 
-                    color={isActive ? COLORS.primary : COLORS.textSecondary}
-                    />
-                    <Text  style={[styles.navLabel, isActive && styles.navLabelActive]}>{item.label}</Text>
-                </Pressable>
-            })}
-            </View>
-
-
-            
-
-
-        </DrawerContentScrollView>
+        <View style={styles.nav}>
+          {/* Навігація */}
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              (pathname === "/" && item.href === "/workout") ||
+              pathname === item.href;
+            return (
+              <Pressable
+                key={item.href}
+                onPress={() => navigate(item.href)}
+                style={[styles.navItem, isActive && styles.navItemActive]}
+              >
+                <Ionicons
+                  name={isActive ? item.iconActive : item.icon}
+                  size={20}
+                  color={isActive ? COLORS.primary : COLORS.textSecondary}
+                />
+                <Text
+                  style={[styles.navLabel, isActive && styles.navLabelActive]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </DrawerContentScrollView>
     );
 }
 
@@ -86,19 +89,19 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: COLORS.primary + '20',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: COLORS.primary + "20",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: SPACING.md,
   },
   avatarText: {
     fontSize: FONT_SIZE.lg,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.primary,
   },
   name: {
     fontSize: FONT_SIZE.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.textPrimary,
   },
   email: {
@@ -117,33 +120,33 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   navItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: SPACING.md,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
   },
   navItemActive: {
-    backgroundColor: COLORS.primary + '12',
+    backgroundColor: COLORS.primary + "12",
   },
   navLabel: {
     fontSize: FONT_SIZE.md,
     color: COLORS.textSecondary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   navLabelActive: {
     color: COLORS.primary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   version: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: FONT_SIZE.xs,
     color: COLORS.textTertiary,
-    marginTop: 'auto',
+    marginTop: "auto",
     paddingTop: SPACING.xl,
   },
 });
- 
+
 
 export default DrawerContent;

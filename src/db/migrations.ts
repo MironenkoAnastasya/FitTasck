@@ -1,10 +1,10 @@
 import { openDatabaseSync } from "expo-sqlite";
- 
-const sqlite = openDatabaseSync("fittrack.db");
- 
+
+const sqlite = openDatabaseSync("fittrack_group.db");
+
 export function runMigrations() {
   sqlite.execSync("PRAGMA foreign_keys = ON;");
- 
+
   sqlite.execSync(`
     CREATE TABLE IF NOT EXISTS workouts (
       id           TEXT PRIMARY KEY NOT NULL,
@@ -17,7 +17,7 @@ export function runMigrations() {
       created_at   TEXT NOT NULL
     );
   `);
- 
+
   sqlite.execSync(`
     CREATE TABLE IF NOT EXISTS exercises (
       id           TEXT PRIMARY KEY NOT NULL,
@@ -30,8 +30,6 @@ export function runMigrations() {
       order_index  INTEGER NOT NULL
     );
   `);
- 
+
   console.log("✅ Migrations completed");
 }
- 
- 

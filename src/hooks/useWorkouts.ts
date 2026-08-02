@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { getAllWorkouts, getExercisesByWorkoutId, getWorkoutById, insertWorkoutWithExercises } from "../db/queires/workouts";
+import { getAllWorkouts, getExercisesByWorkoutId, getWorkoutById, insertWorkoutWithExercises, deleteWorkout } from "../db/queires/workouts";
 import { queryClient } from "../providers/QueryProvider";
 import { NewExercise, NewWorkout } from "../db/schema";
 
@@ -41,3 +41,11 @@ export const useAddWorkout = () => {
     });
 }
 
+export const useDeleteWorkout = () => {
+  return useMutation({
+    mutationFn: (id: string) => deleteWorkout(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workouts"] });
+    },
+  });
+};

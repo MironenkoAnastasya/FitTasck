@@ -1,16 +1,17 @@
 import AddWorkoutModal from '@/src/components/addWorkoutModal';
 import WorkoutCard from '@/src/components/WorkoutCard';
 import { COLORS } from '@/src/constants/theme';
-import { useWorkouts } from '@/src/hooks/useWorkouts';
+import { useWorkouts, useDeleteWorkout } from '@/src/hooks/useWorkouts';
 import { useUIStore } from '@/src/store/uiStore';
-import { useWorkoutStore } from '@/src/store/workoutStore';
 import type { Workout } from '@/src/types/workout';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
 const HomeScreen = () => {
-  
+
+  const { mutate: deleteWorkout } = useDeleteWorkout();
+
   const { data: workouts, isLoading, isError } = useWorkouts();
 
     const router = useRouter();
@@ -18,6 +19,11 @@ const HomeScreen = () => {
     const handleWorkoutPress = (workout: Workout) => {
         router.push({ pathname: "/workout/[id]", params: { id: workout.id } });
     }
+
+    const handleDeleteWorkout = (workout: Workout) => {
+    deleteWorkout(workout.id);
+    console.log("НАЖАЛИ УДАЛИТЬ!")
+    };
     // modal
     const isModalOpen = useUIStore(state => state.isAddWorkoutModalOpen);
     const closeModal = useUIStore(state => state.closeAddWorkoutModal);
@@ -40,7 +46,7 @@ const HomeScreen = () => {
             data={workouts}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <WorkoutCard workout={item} onPress={handleWorkoutPress} />
+              <WorkoutCard workout={item} onPress={handleWorkoutPress} onDelete={handleDeleteWorkout}/>
             )}
           />
         )}

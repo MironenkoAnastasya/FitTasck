@@ -20,12 +20,13 @@ import type { Workout } from "../types/workout";
 type Props = {
   workout: Workout;
   onPress: (workout: Workout) => void;
+  onDelete: (workout: Workout) => void;
 };
 
 const SWIPE_THRESHOLD = 60; // скільки потрібно потягнути, щоб показати кнопку
 const DELETE_WIDTH = 80; // ширина зони видалення
 
-const WorkoutCard = ({ workout, onPress }: Props) => {
+const WorkoutCard = ({ workout, onPress, onDelete }: Props) => {
   const translateX = useSharedValue(0);
   const isOpen = useSharedValue(false);
 
@@ -71,7 +72,9 @@ const WorkoutCard = ({ workout, onPress }: Props) => {
   return (
     <View>
       <Animated.View style={[styles.deleteAction, deleteAnimatedStyle]}>
-        <Pressable style={styles.deleteBtn}>
+        <Pressable 
+        style={styles.deleteBtn}
+        onPress={() => onDelete(workout)}>
           <Ionicons name="trash-outline" size={24} color="#fff" />
         </Pressable>
       </Animated.View>

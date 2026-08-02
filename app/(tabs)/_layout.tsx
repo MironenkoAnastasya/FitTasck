@@ -94,6 +94,37 @@ const TabLayout = () => {
         />
 
         <Tabs.Screen
+          name="watertracker"
+          options={{
+            title: "Трекер води",
+            tabBarIcon: ({ focused, color, size }) => (
+              <Ionicons
+                name={focused ? "water" : "water-outline"}
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        />
+
+        
+
+        <Tabs.Screen
+          name="news"
+          options={{
+            title: "Новини",
+            tabBarIcon: ({ focused, color, size }) => (
+              <Ionicons
+                name={focused ? "newspaper" : "newspaper-outline"}
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        />
+
+
+        <Tabs.Screen
           name="profile"
           options={{
             title: "Профіль",
@@ -106,6 +137,9 @@ const TabLayout = () => {
             ),
           }}
         />
+
+       
+
       </Tabs>
     );
 }

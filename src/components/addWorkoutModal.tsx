@@ -17,14 +17,14 @@ const AddWorkoutModal = ({visible, onClose}: Props) => {
     const [duration, setDuration] = useState('');
 
 
-
+const categoryMap: any = { 'Сила': 'strength', 'Кардіо': 'cardio', 'Гнучкість': 'flexibility' };
 
     const handleSave = () => {
     addWorkout({
         id: Math.random().toString(), 
         title: name,
         duration: Number(duration),
-        category: activeCategory as any,
+        category: categoryMap[activeCategory],
         exercises: [],
         scheduledAt: new Date().toISOString(),
     });
@@ -34,6 +34,8 @@ const AddWorkoutModal = ({visible, onClose}: Props) => {
     setDuration('');
     onClose();
 };
+
+
 
 
 

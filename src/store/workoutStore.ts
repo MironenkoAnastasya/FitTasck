@@ -10,11 +10,14 @@ type WorkoutStore = {
 
   // дії
   addWorkout: (workout: Workout) => void;
+  addExercise: (workoutId: string, exercise: Exercise) => void;
   deleteWorkout: (id: string) => void;
   updateWorkout: (id: string, workout: Workout) => void;
   setFilter: (filter: WorkoutCategory | "all") => void;
+  
   completeWorkout: (id: string) => void;
   reorderExercises: (workoutId: string, exercises: Exercise[]) => void;
+  toggleExerciseComplete: (workoutId: string, exerciseId: string) => void;
 };
 
 export const useWorkoutStore = create<WorkoutStore>()(
@@ -29,6 +32,16 @@ export const useWorkoutStore = create<WorkoutStore>()(
           workouts: [...state.workouts, workout],
         }));
       },
+      addExercise: (workoutId, exercise) => {
+        set((state) => ({
+          workouts: state.workouts.map((w) =>
+            w.id === workoutId
+              ? { ...w, exercises: [...w.exercises, exercise] }
+              : w
+          ),
+        }));
+      },
+      
       deleteWorkout: (id) => {},
       updateWorkout: (id, workout) => {},
       setFilter: (filter) => {},
@@ -40,6 +53,26 @@ export const useWorkoutStore = create<WorkoutStore>()(
           ),
         }));
       },
+
+      toggleExerciseComplete: (workoutId, exerciseId) => {
+        set((state) => ({
+          workouts: state.workouts.map((w) => {
+            if (w.id !== workoutId) return w;
+            return {
+              ...w,
+              exercises: w.exercises.map((ex) =>
+                ex.id === exerciseId ? { ...ex, completed: !ex.completed } : ex
+              ),
+            };
+          }),
+        }));
+      },
+
+
+
+
+
+
     }),
     // конфігурація  persist
     {

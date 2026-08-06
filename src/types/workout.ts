@@ -12,6 +12,7 @@ export type Exercise = {
   weight?: number;
   durationSec?: number;
   orderIndex: number;
+  completed?: boolean;
 };
 
 export type Workout = {

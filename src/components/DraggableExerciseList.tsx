@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
@@ -20,6 +20,8 @@ type Props = {
   exercises: Exercise[];
   accentColor: string;
   onReorder: (exercises: Exercise[]) => void;
+  selectedExerciseIds?: string[];
+  onSelectExercise?: (id: string) => void;
 };
 
 type DraggableRowProps = {
@@ -28,7 +30,9 @@ type DraggableRowProps = {
   count: number;
   accentColor: string;
   exersises: Exercise[],
-  onReorder: (exercises: Exercise[]) => void
+  onReorder: (exercises: Exercise[]) => void,
+  isSelected: boolean;
+  onSelect: () => void;
 };
 
 // весь список
@@ -36,6 +40,8 @@ const DraggableExerciseList = ({
   exercises,
   accentColor,
   onReorder,
+  selectedExerciseIds,
+  onSelectExercise,
 }: Props) => {
   return (
     <View>
@@ -48,6 +54,8 @@ const DraggableExerciseList = ({
           accentColor={accentColor}
           exersises={exercises}
           onReorder={onReorder}
+          isSelected={selectedExerciseIds?.includes(exercise.id) ?? false}
+          onSelect={() => onSelectExercise?.(exercise.id)}
         />
       ))}
     </View>
@@ -68,7 +76,9 @@ const DraggableRow = ({
   count,
   accentColor,
   exersises,
-  onReorder
+  onReorder,
+  isSelected,
+  onSelect,
 }: DraggableRowProps) => {
   const translateY = useSharedValue(0);
   const isDragging = useSharedValue(false);
@@ -122,15 +132,25 @@ const DraggableRow = ({
           {index + 1}
         </Text>
       </View>
-      <View style={styles.exerciseInfo}>
-        <Text style={styles.exerciseName}>{exercise.name}</Text>
-        <Text style={styles.exerciseMeta}>
-          {exercise.sets} × {exercise.reps}
-          {exercise.weight ? ` · ${exercise.weight} кг` : ""}
-          {exercise.durationSec ? ` · ${exercise.durationSec} с` : ""}
-        </Text>
-      </View>
-      <Ionicons name="ellipse-outline" size={22} color={COLORS.border} />
+                 
+
+            <Pressable style={styles.exerciseInfo} onPress={onSelect}>
+              <Text style={styles.exerciseName}>{exercise.name}</Text>
+              <Text style={styles.exerciseMeta}>
+                {exercise.sets} × {exercise.reps}
+                {exercise.weight ? ` · ${exercise.weight} кг` : ""}
+                {exercise.durationSec ? ` · ${exercise.durationSec} с` : ""}
+              </Text>
+            </Pressable>
+
+            <Pressable onPress={onSelect}>
+              <Ionicons 
+                name={isSelected ? "checkmark-circle" : "ellipse-outline"} 
+                size={24} 
+                color={isSelected ? accentColor : COLORS.border} 
+              />
+            </Pressable>
+                  
     </Animated.View>
   );
 };

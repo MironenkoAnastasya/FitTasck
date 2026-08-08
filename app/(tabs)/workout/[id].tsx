@@ -18,12 +18,12 @@ const WorkoutDetailScreen = () => {
   const workout = useWorkoutStore(state => state.workouts.find(w => w.id === id));
   const reorderExercises = useWorkoutStore(state => state.reorderExercises);  
 
-  const toggleExerciseComplete = useWorkoutStore(state => state.toggleExerciseComplete); // 👈 Добавляем
+  const toggleExerciseComplete = useWorkoutStore(state => state.toggleExerciseComplete); 
 
 
   
   
-  // ✅ СТАЛО (массив выбранных ID):
+  
     const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
 
     if (!workout) {
@@ -47,8 +47,8 @@ const WorkoutDetailScreen = () => {
     const handleSelectExercise = (exerciseId: string) => {
     setSelectedExerciseIds(prev => 
       prev.includes(exerciseId) 
-        ? prev.filter(id => id !== exerciseId) // если уже было выбрано — убираем
-        : [...prev, exerciseId]                // если не было — добавляем
+        ? prev.filter(id => id !== exerciseId) 
+        : [...prev, exerciseId]                
       );
   };
 
@@ -58,7 +58,7 @@ const WorkoutDetailScreen = () => {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
-        {/* Статус виконання */}
+       
         {isCompleted && (
           <View style={styles.completedBanner}>
             <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
@@ -68,7 +68,7 @@ const WorkoutDetailScreen = () => {
           </View>
         )}
 
-        {/* Інфо-блок */}
+        
         <View style={[styles.infoBlock, { borderTopColor: accentColor }]}>
           <View style={styles.infoRow}>
             <InfoItem icon="time-outline" label="Тривалість" value={`${workout.duration} хв`} color={accentColor} />
@@ -77,7 +77,7 @@ const WorkoutDetailScreen = () => {
           </View>
         </View>
 
-        {/* Список вправ */}
+        
         {workout.exercises.length > 0 ? (
           <>
             <Text style={styles.sectionTitle}>Програма</Text>
@@ -87,13 +87,13 @@ const WorkoutDetailScreen = () => {
               accentColor={accentColor}
               onReorder={(exercises) => reorderExercises(workout.id, [...exercises, ...completedExercises])}
               selectedExerciseIds={selectedExerciseIds}
-              onSelectExercise={handleSelectExercise} // 👈 ТЕПЕРЬ ТУТ ВЫЗЫВАЕТСЯ НАША ФУНКЦИЯ ВЫБОРА!
+              onSelectExercise={handleSelectExercise} 
             />
               
               
              
 
-            {/* 👇 ДОБАВЬ ВОТ ЭТОТ КУСОЧЕК НИЖЕ: */}
+           
             {completedExercises.length > 0 && (
               <View style={{ marginTop: SPACING.xl }}>
                 <Text style={[styles.sectionTitle, { color: COLORS.textSecondary }]}>
@@ -112,7 +112,7 @@ const WorkoutDetailScreen = () => {
                 />
               </View>
             )}
-            {/* 👆 КОНЕЦ ДОБАВЛЕНИЯ */}
+            
 
 
           </>
@@ -124,7 +124,7 @@ const WorkoutDetailScreen = () => {
           </View>
         )}
 
-        {/* CTA */}
+        
         <Pressable
           style={({ pressed }) => [
             styles.startBtn,
@@ -132,11 +132,9 @@ const WorkoutDetailScreen = () => {
             pressed && { opacity: 0.85 },
           ]}
           onPress={() => {
-    // Проходим по всем выделенным и меняем им статус
           selectedExerciseIds.forEach((exerciseId) => {
             toggleExerciseComplete(workout.id, exerciseId);
           });
-          // Очищаем выбор
           setSelectedExerciseIds([]);
         }}
         disabled={isCompleted}

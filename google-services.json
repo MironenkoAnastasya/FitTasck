@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "530991727607",
+    "project_id": "fittasck",
+    "storage_bucket": "fittasck.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:530991727607:android:d7d75bf93a5dc8b63824f2",
+        "android_client_info": {
+          "package_name": "com.fit.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8z65npBUdzNz6lYVSdTDq1Gy2UgDvMf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

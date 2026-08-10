@@ -1,175 +1,186 @@
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-
-const ProgressPhotoGallery = () => {
-  return (
-    <View>
-      <Text>Фотогалерея</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({})
-
-export default ProgressPhotoGallery;
-
-
-
-{/*
-import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+  useAddProgressPhoto,
+  useDeleteProgressPhoto,
+  usePhotoSourcePicker,
+  useProgressPhotos,
+} from "@/src/hooks/useProgressPhotos";
 
-// Пример интерфейса для объекта фотографии
-interface PhotoItem {
-  id: string;
-  uri: string;
-}
+import {
+  COLORS,
+  SPACING,
+  FONT_SIZE,
+  BORDER_RADIUS,
+} from "@/src/constants/theme";
 
-export const ProgressPhotoGallery = () => {
-  // 1. Состояние для списка фотографий
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+export default function ProgressPhotoGallery() {
+  const { data: photos = [], isLoading } = useProgressPhotos();
+  const { chooseSource } = usePhotoSourcePicker();
+  const addPhotoMutation = useAddProgressPhoto();
+  const deletePhotoMutation = useDeleteProgressPhoto();
 
-  // Функция добавления нового фото (тут потом подключишь выбор из галереи/камеры)
-  const handleAddPhoto = () => {
-    const newPhoto: PhotoItem = {
-      id: Date.now().toString(),
-      // Временная заглушка для теста
-      uri: 'https://via.placeholder.com/150',
-    };
-    setPhotos((prev) => [...prev, newPhoto]);
+  const handleAddPhoto = async () => {
+    const selectedUri = await chooseSource();
+    if (!selectedUri) return;
+    addPhotoMutation.mutate(selectedUri);
   };
 
-  // Функция удаления фото по id
-  const handleDeletePhoto = (id: string) => {
-    setPhotos((prev) => prev.filter((item) => item.id !== id));
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleDateString("uk-UA", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
+
+  if (isLoading) {
+    return <Text style={styles.loading}>Завантаження фото...</Text>;
+  }
 
   return (
     <View style={styles.container}>
-      
       <View style={styles.header}>
-        <Text style={styles.title}>Галерея прогресу</Text>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddPhoto}>
-          <Text style={styles.addButtonText}>+ Додати</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>Фото прогресу</Text>
+
+        <Pressable onPress={handleAddPhoto} style={styles.addButton}>
+          <Ionicons name="camera-outline" size={18} color={COLORS.surface} />
+          <Text style={styles.addButtonText}>Додати</Text>
+        </Pressable>
       </View>
 
-      
-      <FlatList
-        data={photos}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.listContainer}
-        // Отображение каждого элемента сетки
-        renderItem={({ item }) => (
-          <View style={styles.photoCard}>
-            <Image source={{ uri: item.uri }} style={styles.image} />
-            
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => handleDeletePhoto(item.id)}
-            >
-              <Text style={styles.deleteButtonText}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        // Порожній стан з підказкою (выводится, если массив photos пуст)
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Галерея порожня</Text>
-            <Text style={styles.emptySubText}>
-              Натисніть кнопку "+ Додати", щоб додати перше фото
-            </Text>
-          </View>
-        }
-      />
+      {photos.length === 0 ? (
+        <View style={styles.emptyCard}>
+          <Ionicons name="camera-outline" size={48} color={COLORS.textSecondary} />
+          <Text style={styles.emptyTitle}>Немає фото</Text>
+          <Text style={styles.emptyText}>Фотографуй прогрес раз на тиждень щоб бачити зміни</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={photos}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          renderItem={({ item }) => (
+            <View style={styles.photoWrapper}>
+              <View style={styles.photoCard}>
+                <Image
+                  source={{ uri: item.uri }}
+                  style={styles.image}
+                  contentFit="cover"
+                  transition={200}
+                />
+
+                <Pressable
+                  style={styles.deleteButton}
+                  onPress={() =>
+                    deletePhotoMutation.mutate({
+                      id: item.id,
+                      uri: item.uri,
+                    })
+                  }
+                >
+                  <Ionicons name="trash-outline" size={16} color={COLORS.surface} />
+                </Pressable>
+              </View>
+              {item.createdAt && (
+                <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
+              )}
+            </View>
+          )}
+        />
+      )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
+    padding: SPACING.md,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: SPACING.md,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: FONT_SIZE.lg,
+    fontWeight: "bold",
+    color: COLORS.textPrimary,
   },
   addButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+    flexDirection: "row",
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    borderRadius: BORDER_RADIUS.sm,
+    alignItems: "center",
+    gap: 6,
   },
   addButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: COLORS.surface,
+    fontSize: FONT_SIZE.sm,
+    fontWeight: "600",
   },
-  listContainer: {
-    flexGrow: 1,
+  row: {
+    justifyContent: "space-between",
+    marginBottom: SPACING.md,
+  },
+  photoWrapper: {
+    width: "48%",
   },
   photoCard: {
-    flex: 1,
-    margin: 6,
-    height: 150,
-    borderRadius: 8,
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: '#f0f0f0',
+    width: "100%",
+    aspectRatio: 3 / 4,
+    borderRadius: BORDER_RADIUS.sm,
+    overflow: "hidden",
+    backgroundColor: COLORS.border,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   deleteButton: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    backgroundColor: 'rgba(255, 0, 0, 0.7)',
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "absolute",
+    right: 8,
+    top: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    padding: 6,
+    borderRadius: BORDER_RADIUS.full,
   },
-  deleteButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 12,
+  dateText: {
+    marginTop: 4,
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.textSecondary,
+    textAlign: "center",
   },
-  emptyContainer: {
+  emptyCard: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: SPACING.xl,
+    marginTop: 40,
+  },
+  emptyTitle: {
+    fontSize: FONT_SIZE.md,
+    fontWeight: "bold",
+    color: COLORS.textPrimary,
+    marginTop: SPACING.sm,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#8e8e93',
-    marginBottom: 8,
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    marginTop: 4,
   },
-  emptySubText: {
-    fontSize: 14,
-    color: '#aeaeb2',
-    textAlign: 'center',
+  loading: {
+    textAlign: "center",
+    marginTop: 40,
+    color: COLORS.textSecondary,
   },
 });
-
-*/}

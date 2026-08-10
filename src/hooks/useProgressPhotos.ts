@@ -1,99 +1,133 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { deleteProgressPhoto, getAllProgressPhoto, insertProgressPhoto } from "../db/queires/progressPhotos";
-import { queryClient } from "../providers/QueryProvider";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
-import * as ImagePicker from 'expo-image-picker';
+import { Directory, File, Paths } from "expo-file-system";
+import { nanoid } from "nanoid/non-secure";
+import { deleteProgressPhoto, getAllProgressPhotos, insertProgressPhoto } from "@/src/db/queires/progressPhotos";
+import type { NewProgressPhoto } from "@/src/db/schema";
 
-export const useProgressPhotos = () => {
-    return useQuery({
-        queryKey: ["progress-photos"],
-        queryFn: () => getAllProgressPhoto(),
+const TRACKER_PHOTOS_TAG = ["progressPhotos"];
+
+export function useProgressPhotos() {
+  return useQuery({
+    queryKey: TRACKER_PHOTOS_TAG,
+    queryFn: async () => {
+      return await getAllProgressPhotos();
+    },
+  });
+}
+
+export function usePhotoSourcePicker() {
+  const openCameraCapture = async () => {
+    const camPerm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!camPerm.granted) {
+      Alert.alert("Помилка доступу", "Будь ласка, надайте дозвіл на використання камери");
+      return null;
+    }
+    const snap = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      quality: 0.75,
+      allowsEditing: true,
+      aspect: [3, 4],
     });
-}
-
-
-export const useAddProgressPhoto = () => {
-    return useMutation({
-        mutationFn: (uri: string) => {
-
-
-          // 📍 СТАВИМ СЮДА: проверяем, долетает ли URI фото до базы
-        console.log("ПЫТАЕМСЯ СОХРАНИТЬ В БД URI:", uri);
-
-
-        const newPhoto = {
-            id: Date.now().toString(),
-            uri,
-            createdAt: new Date().toISOString(),
-        };
-        return insertProgressPhoto(newPhoto);
-        },
-
-        onSuccess: () => {
-            // 📍 СТАВИМ СЮДА: проверяем, успешно ли база сохранила фото
-            console.log("ФОТО УСПЕШНО ДОБАВЛЕНО В БД!");
-            queryClient.invalidateQueries({ queryKey: ["progress-photos"] });
-        }
-        
-    })
-}
-
-export const useDeleteProgressPhoto = () => {
-    return useMutation({
-        mutationFn: (id: string) => deleteProgressPhoto(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["progress-photos"] });
-        },
-    });
-}
-
-const getImageFromPicker = async (source: 'camera' | 'gallery') => {
-  const isCamera = source === 'camera';
-
-
-  // 📍 СТАВИМ СЮДА: узнать, что за функцию вызвали
-  console.log("ЗАПРОШЕН ИСТОЧНИК:", source);
-  
-  const permission = isCamera 
-    ? await ImagePicker.requestCameraPermissionsAsync()
-    : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-
-    // 📍 СТАВИМ СЮДА: узнать, есть ли разрешение от телефона
-  console.log("РАЗРЕШЕНИЕ ПОЛУЧЕНО?:", permission.granted);
-
-
-
-  if (!permission.granted) return null;
-
-  const result = isCamera 
-    ? await ImagePicker.launchCameraAsync({ allowsEditing: true, quality: 0.8 })
-    : await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, quality: 0.8 });
-
-
-    // 📍 СТАВИМ СЮДА: посмотреть, что вернула галерея
-  console.log("РЕЗУЛЬТАТ ИЗ ГАЛЕРЕИ:", result);
-
-  if (result.canceled || !result.assets[0]?.uri) return null;
-
-  return result.assets[0].uri;
-}
-
-export const usePhotoSourcePicker = () => {
-  const { mutate: addPhoto } = useAddProgressPhoto();
-
-  const handlePick = async (source: 'camera' | 'gallery') => {
-    const uri = await getImageFromPicker(source);
-    if (uri) addPhoto(uri);
-  }
-
-  const pickImage = () => {
-    Alert.alert("Додати фото", "Оберіть джерело", [
-      { text: "Камера", onPress: () => handlePick('camera') },
-      { text: "Галерея", onPress: () => handlePick('gallery') },
-      { text: "Скасувати", style: "cancel" },
-    ]);
+    if (snap.canceled) {
+      return null;
+    }
+    return snap.assets[0].uri;
   };
 
-  return { pickImage };
+  const openGallerySelect = async () => {
+    const galPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!galPerm.granted) {
+      Alert.alert("Помилка доступу", "Будь ласка, дозвольте доступ до галереї фотографій");
+      return null;
+    }
+    const pick = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.75,
+      allowsEditing: true,
+      aspect: [3, 4],
+    });
+    if (pick.canceled) {
+      return null;
+    }
+    return pick.assets[0].uri;
+  };
+
+  const chooseSource = () => {
+    return new Promise<string | null>((resolve) => {
+      Alert.alert("Нове фото", "Звідки бажаєте додати знімок?", [
+        {
+          text: "Камера",
+          onPress: async () => {
+            resolve(await openCameraCapture());
+          },
+        },
+        {
+          text: "Галерея",
+          onPress: async () => {
+            resolve(await openGallerySelect());
+          },
+        },
+        {
+          text: "Скасувати",
+          style: "cancel",
+          onPress: () => resolve(null),
+        },
+      ]);
+    });
+  };
+
+  return {
+    chooseSource,
+  };
+}
+
+export function useAddProgressPhoto() {
+  const clientManager = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (photoUri: string) => {
+      const targetFolder = new Directory(Paths.document, "my-workout-images");
+      if (!targetFolder.exists) {
+        targetFolder.create();
+      }
+      const targetFile = new File(targetFolder, `photo_${Date.now()}.jpg`);
+      const originFile = new File(photoUri);
+      await originFile.copy(targetFile);
+      
+      const recordItem: NewProgressPhoto = {
+        id: nanoid(),
+        uri: targetFile.uri,
+        createdAt: new Date().toISOString(),
+      };
+      
+      await insertProgressPhoto(recordItem);
+      return recordItem;
+    },
+    onSuccess: () => {
+      clientManager.invalidateQueries({
+        queryKey: TRACKER_PHOTOS_TAG,
+      });
+    },
+  });
+}
+
+export function useDeleteProgressPhoto() {
+  const clientManager = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, uri }: { id: string; uri: string }) => {
+      const targetFile = new File(uri);
+      if (targetFile.exists) {
+        targetFile.delete();
+      }
+      await deleteProgressPhoto(id);
+    },
+    onSuccess: () => {
+      clientManager.invalidateQueries({
+        queryKey: TRACKER_PHOTOS_TAG,
+      });
+    },
+  });
 }

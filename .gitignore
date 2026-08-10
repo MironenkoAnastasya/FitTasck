@@ -41,3 +41,5 @@ app-example
 # generated native folders
 /ios
 /android
+
+git rm --cached fittasck-firebase-adminsdk-fbsvc-7f2019d697.json
